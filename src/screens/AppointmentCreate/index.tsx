@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import uuid from 'react-native-uuid';
 import {
     View,
     Text,
@@ -6,6 +7,7 @@ import {
     ScrollView,
     KeyboardAvoidingView
 } from 'react-native';
+
 import { RectButton } from 'react-native-gesture-handler';
 import { CategorySelect } from '../../components/CategorySelect';
 import { GuildIcon } from '../../components/GuildIcon';
@@ -21,11 +23,22 @@ import { ModalView } from '../../components/ModalView';
 import { Guilds } from '../Guilds';
 import { GuildProps } from '../../components/Guild';
 import { Background } from '../../components/Background';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLLECTION_APPOINTMENTS } from '../../configs/database';
+import { useNavigation } from '@react-navigation/core';
 
 export function AppointmentCreate() {
     const [category, setCategory] = useState('');
     const [openGuildsModal, setOpenGuildsModal] = useState(false);
     const [guild, setGuild] = useState<GuildProps>({} as GuildProps);
+
+    const [day, setDay] = useState<string>('');
+    const [month, setMonth] = useState<string>('');
+    const [hour, setHour] = useState<string>('');
+    const [minute, setMinute] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+
+    const navigation = useNavigation();
 
     function handleCloseGuilds() {
         setOpenGuildsModal(false);
@@ -42,6 +55,27 @@ export function AppointmentCreate() {
 
     function handleCategorySelect(categoryId: string) {
         setCategory(categoryId);
+    }
+
+    async function handleSave() {
+        const newAppointment = {
+            id: uuid.v4(),
+            guild,
+            category,
+            date: `${day}/${month} às ${hour}:${minute}h`,
+            description
+        };
+
+        const storage = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
+
+        const appointments = storage ? JSON.parse(storage) : [];
+
+        await AsyncStorage.setItem(
+            COLLECTION_APPOINTMENTS,
+            JSON.stringify([...appointments, newAppointment])
+        );
+
+        navigation.navigate('Home');
     }
 
     return (
@@ -64,7 +98,7 @@ export function AppointmentCreate() {
                         }
                     ]}>
                         Categoria
-            </Text>
+                    </Text>
 
                     <CategorySelect
                         hasCheckBox
@@ -75,11 +109,7 @@ export function AppointmentCreate() {
                     <View style={styles.form}>
                         <RectButton onPress={handleOpenGuilds}>
                             <View style={styles.select}>
-                                {
-                                    guild.icon
-                                        ? <GuildIcon />
-                                        : <View style={styles.image} />
-                                }
+                                <GuildIcon guildId={guild.id} iconId={guild.icon} />
 
                                 <View style={styles.selectBody}>
                                     <Text style={styles.label}>
@@ -105,24 +135,36 @@ export function AppointmentCreate() {
                         </Text>
 
                                 <View style={styles.column}>
-                                    <SmallInput maxLength={2} />
+                                    <SmallInput
+                                        maxLength={2}
+                                        onChangeText={setDay}
+                                    />
                                     <Text style={styles.divider}>
                                         /
-                            </Text>
-                                    <SmallInput maxLength={2} />
+                                    </Text>
+                                    <SmallInput
+                                        maxLength={2}
+                                        onChangeText={setMonth}
+                                    />
                                 </View>
                             </View>
                             <View>
                                 <Text style={[styles.label, { marginBottom: 12 }]}>
                                     Hora e Minuto
-                        </Text>
+                                </Text>
 
                                 <View style={styles.column}>
-                                    <SmallInput maxLength={2} />
+                                    <SmallInput
+                                        maxLength={2}
+                                        onChangeText={setHour}
+                                    />
                                     <Text style={styles.divider}>
                                         :
-                            </Text>
-                                    <SmallInput maxLength={2} />
+                                    </Text>
+                                    <SmallInput
+                                        maxLength={2}
+                                        onChangeText={setMinute}
+                                    />
                                 </View>
                             </View>
                         </View>
@@ -130,10 +172,10 @@ export function AppointmentCreate() {
                         <View style={[styles.field, { marginBottom: 12 }]}>
                             <Text style={styles.label}>
                                 Descrição
-                    </Text>
+                            </Text>
                             <Text style={styles.caracteresLimit}>
                                 Max 100 caracteres
-                    </Text>
+                            </Text>
                         </View>
 
                         <TextArea
@@ -141,9 +183,13 @@ export function AppointmentCreate() {
                             maxLength={100}
                             numberOfLines={5}
                             autoCorrect={false}
+                            onChangeText={setDescription}
                         />
                         <View style={styles.footer}>
-                            <Button title="Agendar" />
+                            <Button
+                                title="Agendar"
+                                onPress={handleSave}
+                            />
                         </View>
                     </View>
                 </ScrollView>
