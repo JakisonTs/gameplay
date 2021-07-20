@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { View, FlatList, Image } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { Guild, GuildProps } from '../../components/Guild';
 import { ListDivider } from '../../components/ListDivider';
+import { getBottomSpace } from 'react-native-iphone-x-helper';
 
 import { styles } from './styles';
 type Props = {
@@ -37,7 +38,9 @@ export function Guilds({ handleGuildSelect }: Props) {
                     />
                 )}
                 showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={() => (<ListDivider />)}
+                ItemSeparatorComponent={() => <ListDivider isCentered />}
+                contentContainerStyle={{ paddingBottom: getBottomSpace() + 68, paddingTop: 103 }}
+                ListHeaderComponent={() => <ListDivider isCentered />}
                 style={styles.guilds}
             />
         </View>

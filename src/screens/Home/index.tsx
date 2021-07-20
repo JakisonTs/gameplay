@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { Appointment } from '../../components/Appointment';
 import { ButtonAdd } from '../../components/ButtonAdd';
 import { CategorySelect } from '../../components/CategorySelect';
 import { ListDivider } from '../../components/ListDivider';
 import { ListHeader } from '../../components/ListHeader';
-import { Profile } from '../Profile';
+import { Profile } from '../../components/Profile';
 import { Background } from '../../components/Background';
+import { getBottomSpace } from 'react-native-iphone-x-helper';
 
 
 import { styles } from './styles';
@@ -68,26 +69,25 @@ export function Home() {
                 setCategory={handleCategorySelect}
             />
 
-            <View style={styles.content}>
-                <ListHeader
-                    title="Partidas agendadas"
-                    subtitle="Total 6"
-                />
+            <ListHeader
+                title="Partidas agendadas"
+                subtitle="Total 6"
+            />
 
-                <FlatList
-                    data={appointments}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                        <Appointment
-                            data={item}
-                            onPress={handleAppointmentDetails}
-                        />
-                    )}
-                    ItemSeparatorComponent={() => <ListDivider />}
-                    style={styles.matches}
-                    showsVerticalScrollIndicator={false}
-                />
-            </View>
+            <FlatList
+                data={appointments}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                    <Appointment
+                        data={item}
+                        onPress={handleAppointmentDetails}
+                    />
+                )}
+                ItemSeparatorComponent={() => <ListDivider />}
+                contentContainerStyle={{ paddingBottom: getBottomSpace() + 69 }}
+                style={styles.matches}
+                showsVerticalScrollIndicator={false}
+            />
         </Background>
     );
 }
