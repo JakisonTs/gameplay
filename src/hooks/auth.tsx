@@ -33,6 +33,7 @@ type AuthContextData = {
     user: User;
     loading: boolean;
     signIn: () => Promise<void>;
+    signOut: () => Promise<void>;
 }
 
 type AuthProviderProps = {
@@ -86,6 +87,15 @@ function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    async function signOut() {
+        try {
+            setUser({} as User);
+            await AsyncStorage.removeItem(COLLECTION_USER);
+        } catch {
+            throw new Error('Não foi possível deslogar do app');
+        }
+    }
+
     async function loadUserStorageData() {
         const storage = await AsyncStorage.getItem(COLLECTION_USER);
 
@@ -102,7 +112,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, signIn, loading }}>
+        <AuthContext.Provider value={{ user, signIn, signOut, loading }}>
             {children}
         </AuthContext.Provider>
     )
